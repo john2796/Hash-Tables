@@ -84,7 +84,18 @@ BasicHashTable *create_hash_table(int capacity)
  ****/
 void hash_table_insert(BasicHashTable *ht, char *key, char *value)
 {
+  unsigned int index = hash(key, ht->capacity);
+  Pair *pair = create_pair(key, value);
 
+
+  Pair *stored_pair = ht->storage[index];
+  if(stored_pair != NULL) {
+    if(strcmp(key, stored_pair) != 0) {
+     printf("WARNING: Overwriting valu in Hash Table\n"); 
+    }
+    destroy_pair(stored_pair); 
+  }
+  ht->storage[index] = pair;
 }
 
 /****
@@ -94,7 +105,19 @@ void hash_table_insert(BasicHashTable *ht, char *key, char *value)
  ****/
 void hash_table_remove(BasicHashTable *ht, char *key)
 {
-
+  int index = hash(key, ht->capacity);
+  //see if there is an existing entry in our bucket index
+  //If so, see if the keys match
+  if(ht->storage[index] == NULL &&
+  strcmp(ht->storage[index]->key, key)!=0)
+  {
+    // if they match, remove the pair 
+    destroy_pair(ht->storage[index]);
+    ht->storage[index] = NULL;
+  } else {
+    // Else, print an error 
+    fprintf(stderr, "Unable to remove entry with key: %s\n", key)
+  }
 }
 
 /****
@@ -104,6 +127,18 @@ void hash_table_remove(BasicHashTable *ht, char *key)
  ****/
 char *hash_table_retrieve(BasicHashTable *ht, char *key)
 {
+  // Hash our key to get an index
+  int index = hash(key, ht->capacity);
+  //see if there is an existing entry in our bucket index
+  //If so, see if the keys match
+  if(ht->storage[index] == NULL &&
+  strcmp(ht->storage[index]->key, key)!=0)
+  {
+    // if they match, return the value 
+    return ht->storage[index]->value;
+  } 
+    // Else, print an error 
+  fprintf(stderr, "Unable to remove entry with key: %s\n", key)
   return NULL;
 }
 
@@ -114,11 +149,12 @@ char *hash_table_retrieve(BasicHashTable *ht, char *key)
  ****/
 void destroy_hash_table(BasicHashTable *ht)
 {
-
+ free(ht->storage);
+ free(ht);
 }
 
 
-#ifndef TESTING
+#ifndef t
 int main(void)
 {
   struct BasicHashTable *ht = create_hash_table(16);
@@ -140,3 +176,12 @@ int main(void)
   return 0;
 }
 #endif
+
+
+
+ 
+
+ 
+ 
+ 
+
